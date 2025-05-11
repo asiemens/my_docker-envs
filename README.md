@@ -1,4 +1,5 @@
-# my docker desktop - rapid skaffold
+# my docker enviorments
+# a desktop - rapid skaffold
 #  use ubuntu, load latest tool and enable ssh & rdp
 #
 

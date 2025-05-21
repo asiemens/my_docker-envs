@@ -43,5 +43,6 @@
     ```ps
     docker rm -f lubu-container
     docker rmi -f lubu:latest
+    docker system prune -a
     ```
 

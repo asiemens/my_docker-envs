@@ -1,0 +1,42 @@
+# Neo4j specific files
+/data/databases/
+/data/dbms/
+/data/transactions/
+/data/server_id
+
+# neo4j folder
+/neo4j/neo4j/    
+
+# Log files
+/logs/
+*.log
+
+# Configuration that might contain sensitive information
+/conf/
+
+# Plugins directory (if you want to version control specific plugins, remove this)
+/plugins/
+
+# Temp files
+*.tmp
+*.temp
+*.swp
+*~
+
+# System specific
+.DS_Store
+Thumbs.db
+
+# Keep these if you want to version control specific configurations
+!data/dbms/auth.ini
+!conf/*.conf
+!conf/*.properties
+
+# Database locks
+*.db.lock
+database_lock
+store_lock
+
+# Neo4j specific temporary files
+id-buffer.tmp.*
+neostore.*

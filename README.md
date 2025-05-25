@@ -6,7 +6,7 @@
 ### get up and running
 
 1. Build image
-    ```ps
+    ```pwsh
     docker build -t lubu .\
     ```
 

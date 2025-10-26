@@ -1,33 +1,62 @@
-FROM ubuntu:latest
+# Use a pinned LTS base for reproducible builds
+FROM ubuntu:22.04
 
-# Update and install LXQt desktop environment and XRDP
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt update && \
-    apt install -y lubuntu-desktop && \
-    apt install -y xrdp && \
-    adduser xrdp ssl-cert
+ARG DEBIAN_FRONTEND=noninteractive
+ARG USERNAME=me
+ARG PASSWORD=changeme
 
-# Install my build tools
-RUN apt install -y build-essential git default-jdk maven build-essential python3 nodejs npm
+# Metadata
+LABEL maintainer="you@example.com"
+LABEL org.opencontainers.image.source="https://github.com/your/repo"
 
-# Install additional tools
-#RUN apt install -y microsoft-edge-stable
+# Install packages in one layer, minimize recommends, and clean up caches
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      sudo \
+      curl \
+      gnupg \
+      lsb-release \
+      xrdp \
+      openssh-server \
+  xfce4 \
+  xfce4-goodies \
+  dbus \
+  dbus-x11 \
+  netcat-openbsd \
+      xorg \
+      xserver-xorg-core \
+      build-essential \
+      git \
+      openjdk-17-jdk \
+      maven \
+      python3 \
+      nodejs \
+      npm && \
+    # add xrdp user to ssl-cert group (xrdp package typically creates the user)
+    adduser xrdp ssl-cert || true && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install SSH server
-RUN apt install -y openssh-server && \
-    mkdir /var/run/sshd && \
-    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
-    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
+# Create a non-root user (prefer passing PASSWORD as build-arg or using secrets)
+RUN useradd -m -s /bin/bash ${USERNAME} && \
+    echo "${USERNAME}:${PASSWORD}" | chpasswd && \
+    usermod -aG sudo ${USERNAME} && \
+    # lock root account (do not permit root login by default)
+    passwd -l root
 
+# Configure SSH more securely: keep root disabled, allow password auth only if necessary
+RUN mkdir -p /var/run/sshd && \
+    sed -i 's/^#PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config && \
+    sed -i 's/^#PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
-# Create a user and add to sudo group
-RUN useradd -m me && \
-    echo "me:2345" | chpasswd && \
-    usermod -aG sudo me
+# Add entrypoint script
+COPY docker-start.sh /usr/local/bin/docker-start.sh
+RUN chmod +x /usr/local/bin/docker-start.sh
 
-# Expose ports for XRDP and SSH
-EXPOSE 3389
-EXPOSE 22
+EXPOSE 3389 22
 
-# Start services
-CMD ["/bin/bash", "-c", "service xrdp start && service ssh start && /bin/bash"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
+  CMD bash -c "nc -z localhost 22 || exit 1"
+
+ENTRYPOINT ["/usr/local/bin/docker-start.sh"]
+CMD ["/bin/bash"]

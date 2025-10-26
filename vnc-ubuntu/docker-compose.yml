@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  vnc-ubuntu:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USERNAME: dev
+        VNC_PASSWORD: changeme
+    image: vnc-ubuntu:20.04
+    container_name: vnc-ubuntu
+    ports:
+      - "5901:5901"
+      - "6901:6901"
+    environment:
+      - VNC_PASSWORD=changeme
+    restart: unless-stopped

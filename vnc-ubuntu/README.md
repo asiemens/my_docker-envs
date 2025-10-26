@@ -18,7 +18,7 @@ docker build -t vnc-ubuntu:20.04 -f Dockerfile .
 Run (PowerShell):
 
 ```powershell
-docker rm -f vnc-ubuntu 2>$null; docker run -d --name vnc-ubuntu -p 5901:5901 -e VNC_PASSWORD=yourpassword vnc-ubuntu:20.04
+docker run -d --name vnc-ubuntu -p 5901:5901 -e VNC_PASSWORD=yourpassword vnc-ubuntu:20.04
 ```
 
 Or use compose:
